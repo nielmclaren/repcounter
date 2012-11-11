@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+        <title>Accelerometer Output</title>
+        
+        <script type="text/javascript" src="libs/jquery-1.6.2.min.js"></script>
+        <script type="text/javascript" src="libs/d3.v2.min.js"></script> 
+        
+        <script type="text/javascript">
+            // Looks like I can find reps by testing whether the derivative went
+            // above a certain threshold followed by waiting for it to pass through zero.
+
+            // Acceleration *is* a derivative!
+
+            // Hold the sensor in the rest position for 3 seconds and the phone will give
+            // a double beep. When you hear the beep, start and reps will be recorded.
+
+            $(document).ready(function() {
+                var margin = {top: 20, right: 20, bottom: 30, left: 50},
+                    width = 960 - margin.left - margin.right,
+                    height = 500 - margin.top - margin.bottom;
+
+                var parseDate = d3.time.format("%d-%b-%y").parse;
+
+                var x = d3.time.scale()
+                    .range([0, width]);
+
+                var y = d3.scale.linear()
+                    .range([height, 0]);
+
+                var xAxis = d3.svg.axis()
+                    .scale(x)
+                    .orient("bottom");
+
+                var yAxis = d3.svg.axis()
+                    .scale(y)
+                    .orient("left");
+
+                var line = function(varName) {
+                    return d3.svg.line()
+                      .x(function(d) { return x(d.t); })
+                      .y(function(d) { return y(d[varName]); });
+                }
+
+                var svg = d3.select("body").append("svg")
+                    .attr("width", width + margin.left + margin.right)
+                    .attr("height", height + margin.top + margin.bottom)
+                  .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+                var start;
+
+                d3.tsv("accel.tsv", function(data, error) {
+                  var reps = [];
+                  var threshed = false;
+                  start = Number(data[0].t);
+                  data.forEach(function(d, i) {
+                    d.t = Number(d.t);
+                    d.x = Number(d.x);
+                    d.y = Number(d.y);
+                    d.z = Number(d.z);
+
+                    // Derivatives
+                    d.dx = i > 0 ? d.x - data[i-1].x : 0;
+                    d.dy = i > 0 ? d.y - data[i-1].y : 0;
+                    d.dz = i > 0 ? d.z - data[i-1].z : 0;
+
+                    // Averages
+                    var runDuration = 500;
+                    var recentRun = function(data, i) {
+                        return data.slice(0,i+1).filter(function(d) { return d.t > data[i].t - runDuration; });
+                    }
+                    d.ax = d3.mean(recentRun(data, i).map(function(d) { return d.x; }));
+
+                    // Derivative of the average
+                    d.dax = i > 0 ? d.ax - data[i-1].ax : 0;
+
+                    // Average of the derivative
+                    d.adx = d3.mean(recentRun(data, i).map(function(d) { return d.dx; }));
+
+                    if (i > 0 && threshed && d.adx / Math.abs(d.adx) != data[i-1].adx / Math.abs(data[i-1].adx)) {
+                        // Crossed over zero
+                        threshed = false;
+                        reps.push({t: d.t});
+                    }
+                    if (!threshed && Math.abs(d.adx) > 0.2) {
+                        threshed = true;
+                    }
+                  });
+
+                  x.domain(d3.extent(data, function(d) { return d.t; }));
+                  y.domain(d3.extent(data, function(d) { return d.adx; }));
+
+                  svg.append("g")
+                      .attr("class", "x axis")
+                      .attr("transform", "translate(0," + height + ")")
+                      .call(xAxis);
+
+                  svg.append("g")
+                      .attr("class", "y axis")
+                      .call(yAxis);
+/*
+                  svg.append("path")
+                      .datum(data)
+                      .attr("class", "line")
+                      .style("stroke", "#ff9999")
+                      .attr("d", line('x'));
+
+                  svg.append("path")
+                      .datum(data)
+                      .attr("class", "line")
+                      .style("stroke", "#ff4444")
+                      .attr("d", line('ax'));
+
+                  svg.append("path")
+                      .datum(data)
+                      .attr("class", "line")
+                      .style("stroke", "#ff0000")
+                      .attr("d", line('dax'));
+*/
+                  svg.append("path")
+                      .datum(data)
+                      .attr("class", "line")
+                      .style("stroke", "#00ff00")
+                      .attr("d", line('adx'));
+
+                  svg.selectAll('line.detected')
+                      .data(reps)
+                    .enter().append('line')
+                      .attr('class', 'detected')
+                      .attr('x1', function(d, i) { return x(d.t); })
+                      .attr('y1', 0)
+                      .attr('x2', function(d) { return x(d.t); })
+                      .attr('y2', height)
+                      .style('stroke', '#333333');
+
+                  d3.tsv("reps.tsv", function(data, error) {
+                      data.forEach(function(d) {
+                          d.t = Number(d.t);
+                      });
+
+                      svg.selectAll('line.rep')
+                          .data(data)
+                        .enter().append('line')
+                          .attr('class', 'rep')
+                          .attr('x1', function(d, i) { return x(d.t); })
+                          .attr('y1', 0)
+                          .attr('x2', function(d) { return x(d.t); })
+                          .attr('y2', height)
+                          .style('stroke', '#eeeeee')
+                          .style('stroke-width', 4);
+                    });
+                });
+
+            });
+        </script>
+        
+        <style type="text/css">
+            html, body {
+                height: 100%;
+                padding: 0;
+                width: 100%;
+            }
+            .axis path,
+            .axis line {
+              fill: none;
+              stroke: #000;
+              shape-rendering: crispEdges;
+            }
+
+            .x.axis path {
+              display: none;
+            }
+
+            .line {
+              fill: none;
+              stroke: steelblue;
+              stroke-width: 1.5px;
+            }
+        
+        </style>
+    </head>
+
+    <body>
+        <div id="chartContainer">
+            <div id="yAxis"></div>
+            <div id="chart"></div>
+        </div>
+    </body>
+</html>
+
