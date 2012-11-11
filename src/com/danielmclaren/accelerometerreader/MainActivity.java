@@ -31,6 +31,8 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private StringBuffer accel;
 	private StringBuffer reps;
 	
+	private static final String baseUrl = "http://192.168.1.121/2012/dmclaren/repcounter/wwwdocs";
+	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -72,6 +74,15 @@ public class MainActivity extends Activity implements SensorEventListener {
 				event.values[0],
 				event.values[1],
 				event.values[2]));
+		
+		accel.append(System.currentTimeMillis());
+		accel.append("\t");
+		accel.append(event.values[0]);
+		accel.append("\t");
+		accel.append(event.values[1]);
+		accel.append("\t");
+		accel.append(event.values[2]);
+		accel.append("\n");
 	}
 	
 	public void recordRep(View view) {
@@ -89,7 +100,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 	private class SendDataTask extends AsyncTask<String, Void, Void> {
 		protected Void doInBackground(String... data) {
 			try {
-				URL url = new URL("http://192.168.1.101/2012/dmclaren/repcounter/save_accel.php");
+				URL url = new URL(baseUrl + "/save_accel.php");
 				URLConnection conn = url.openConnection();
 				conn.setDoInput(true);
 				conn.setDoOutput(true);
@@ -117,7 +128,7 @@ public class MainActivity extends Activity implements SensorEventListener {
 			}
 
 			try {
-				URL url = new URL("http://192.168.1.101/2012/dmclaren/repcounter/save_reps.php");
+				URL url = new URL(baseUrl + "/save_reps.php");
 				URLConnection conn = url.openConnection();
 				conn.setDoInput(true);
 				conn.setDoOutput(true);
