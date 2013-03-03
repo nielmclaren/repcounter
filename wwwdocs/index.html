@@ -60,24 +60,9 @@
                     d.x = Number(d.x);
                     d.y = Number(d.y);
                     d.z = Number(d.z);
-
-                    // Derivatives
-                    d.dx = i > 0 ? d.x - data[i-1].x : 0;
-                    d.dy = i > 0 ? d.y - data[i-1].y : 0;
-                    d.dz = i > 0 ? d.z - data[i-1].z : 0;
-
-                    // Averages
-                    var runDuration = 500;
-                    var recentRun = function(data, i) {
-                        return data.slice(0,i+1).filter(function(d) { return d.t > data[i].t - runDuration; });
-                    }
-                    d.ax = d3.mean(recentRun(data, i).map(function(d) { return d.x; }));
-
-                    // Derivative of the average
-                    d.dax = i > 0 ? d.ax - data[i-1].ax : 0;
-
-                    // Average of the derivative
-                    d.adx = d3.mean(recentRun(data, i).map(function(d) { return d.dx; }));
+                    d.adx = Number(d.adx);
+                    d.ady = Number(d.ady);
+                    d.adz = Number(d.adz);
 
                     if (i > 0 && threshed && d.adx / Math.abs(d.adx) != data[i-1].adx / Math.abs(data[i-1].adx)) {
                         // Crossed over zero
@@ -104,19 +89,9 @@
                   svg.append("path")
                       .datum(data)
                       .attr("class", "line")
-                      .style("stroke", "#00ff00")
+                      .style("stroke", "#9999ff")
                       .attr("d", line('adx'));
-
-                  svg.selectAll('line.detected')
-                      .data(reps)
-                    .enter().append('line')
-                      .attr('class', 'detected')
-                      .attr('x1', function(d, i) { return x(d.t); })
-                      .attr('y1', 0)
-                      .attr('x2', function(d) { return x(d.t); })
-                      .attr('y2', height)
-                      .style('stroke', '#333333');
-
+               
                   d3.tsv("reps.tsv", function(data, error) {
                       data.forEach(function(d) {
                           d.t = Number(d.t);
@@ -131,10 +106,27 @@
                           .attr('x2', function(d) { return x(d.t); })
                           .attr('y2', height)
                           .style('stroke', '#eeeeee')
-                          .style('stroke-width', 4);
-                    });
-                });
+                          .style('stroke-width', 2);
+                  });
 
+                  d3.tsv("detections.tsv", function(data, error) {
+                      console.log(data);
+                      data.forEach(function(d) {
+                          d.t = Number(d.t);
+                      });
+
+                      svg.selectAll('line.detection')
+                          .data(data)
+                        .enter().append('line')
+                          .attr('class', 'detection')
+                          .attr('x1', function(d, i) { return x(d.t); })
+                          .attr('y1', 0)
+                          .attr('x2', function(d) { return x(d.t); })
+                          .attr('y2', height)
+                          .style('stroke', '#666666')
+                          .style('stroke-width', 2);
+                  });
+                });
             });
         </script>
         
