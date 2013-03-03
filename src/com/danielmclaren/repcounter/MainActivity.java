@@ -1,5 +1,7 @@
 package com.danielmclaren.repcounter;
 
+import io.socket.*;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -10,6 +12,8 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Iterator;
+
+import org.json.*;
 
 import android.app.Activity;
 import android.content.Context;
@@ -71,6 +75,56 @@ public class MainActivity extends Activity implements SensorEventListener {
 		accel = new StringBuffer("t\tx\ty\tz\tadx\tady\tadz\n");
 		reps = new StringBuffer("t\n");
 		detections = new StringBuffer("t\n");
+		
+		////
+		
+		SocketIO socket;
+		try {
+			socket = new SocketIO("http://192.168.1.102:3000");
+	        socket.connect(new IOCallback() {
+	            @Override
+	            public void onMessage(JSONObject json, IOAcknowledge ack) {
+	                try {
+	                    System.out.println("Server said:" + json.toString(2));
+	                } catch (JSONException e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	
+	            @Override
+	            public void onMessage(String data, IOAcknowledge ack) {
+	                System.out.println("Server said: " + data);
+	            }
+	
+	            @Override
+	            public void onError(SocketIOException socketIOException) {
+	                System.out.println("an Error occured");
+	                socketIOException.printStackTrace();
+	            }
+	
+	            @Override
+	            public void onDisconnect() {
+	                System.out.println("Connection terminated.");
+	            }
+	
+	            @Override
+	            public void onConnect() {
+	                System.out.println("Connection established");
+	            }
+	
+	            @Override
+	            public void on(String event, IOAcknowledge ack, Object... args) {
+	                System.out.println("Server triggered event '" + event + "'");
+	            }
+	        });
+	
+	        // This line is cached until the connection is establisched.
+	        socket.send("Hello Server!");
+		} catch (MalformedURLException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+
 	}
 
 	@Override
