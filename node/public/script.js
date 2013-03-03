@@ -6,6 +6,10 @@ $(document).ready(function() {
 		$('#output').text($('#output').text() + "\nwhoIs? iAm.");
 	});
 
+	socket.on('sensorChanged', function(x, y, z, adx, ady, adz) {
+		console.log(x, y, z, adx, ady, adz);
+	});
+
 	$('body').append('<textarea id="output"></textarea>');
 	$('#output').text('Test.');
 });
