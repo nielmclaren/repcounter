@@ -21,11 +21,6 @@ $(document).ready(function() {
 	setInterval(redraw, 100);
 
 	var now = (new Date()).getTime();
-
-	y = d3.scale.linear()
-			.domain([-5, 5])
-			.rangeRound([0, h]);
-		
 	chart = d3.select("body").append("svg")
 			.attr("class", "chart")
 			.attr("width", 800)
@@ -41,26 +36,31 @@ function redraw() {
 			.domain([now - ago, now])
 			.range([0, 800]);
 	
-	redrawRect("x", 0);
-	redrawRect("y", 400);
-	redrawRect("z", 800);
+	y = d3.scale.linear()
+			.domain([-20, 20])
+			.rangeRound([-h, h]);
+		
+	redrawProperty("x", 200);
+	redrawProperty("y", 400);
+	redrawProperty("z", 600);
 }
 
-function redrawRect(propertyName, yOffset) {
-	var rect = chart.selectAll("rect." + propertyName)
+function redrawProperty(propertyName, yOffset) {
+	var line = chart.selectAll("line." + propertyName)
 			.data(data, function(d) { return d.time; });
 
-	rect.enter().insert("rect", "line")
+	line.enter().insert("line")
 			.attr("class", propertyName)
-			.attr("x", function(d, i) { return x(d.time); })
-			.attr("y", function(d) { return h - y(d[propertyName]) - 0.5 + yOffset; })
-			.attr("width", 2)
-			.attr("height", function(d) { return y(d[propertyName]); });
+			.attr("x1", function(d) { return x(d.time); })
+			.attr("y1", function(d) { return yOffset; })
+			.attr("x2", function(d) { return x(d.time); })
+			.attr("y2", function(d) { return yOffset + y(d[propertyName]); });
 
-	rect
-			.attr("x", function(d, i) { return x(d.time); });
+	line
+			.attr("x1", function(d, i) { return x(d.time); })
+			.attr("x2", function(d, i) { return x(d.time); });
 	
-	rect.exit()
+	line.exit()
 			.remove();
 }
 

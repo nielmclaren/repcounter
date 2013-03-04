@@ -8,6 +8,18 @@ textarea {
 	width: 100%;
 }
 
-.chart rect {
-  fill: steelblue;
+.chart line {
+	strokeWidth: 1px;
+}
+
+.chart line.x {
+  stroke: steelblue;
+}
+
+.chart line.y {
+	stroke: red;
+}
+
+.chart line.z {
+	stroke: green;
 }
