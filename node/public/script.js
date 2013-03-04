@@ -11,10 +11,7 @@ $(document).ready(function() {
 	});
 
 	socket.on('sensorChanged', function(time, x, y, z, adx, ady, adz) {
-		data.push({
-			time: time,
-			value: adx
-		});
+		data.push({time: time, x: x, y: y, z: z});
 	});
 
 	socket.on('repDetected', function(time) {
@@ -26,13 +23,13 @@ $(document).ready(function() {
 	var now = (new Date()).getTime();
 
 	y = d3.scale.linear()
-			.domain([-1, 1])
+			.domain([-5, 5])
 			.rangeRound([0, h]);
 		
 	chart = d3.select("body").append("svg")
 			.attr("class", "chart")
 			.attr("width", 800)
-			.attr("height", 100);
+			.attr("height", 1600);
 });
 
 function redraw() {
@@ -43,19 +40,27 @@ function redraw() {
 	x = d3.scale.linear()
 			.domain([now - ago, now])
 			.range([0, 800]);
+	
+	redrawRect("x", 0);
+	redrawRect("y", 400);
+	redrawRect("z", 800);
+}
 
-	var rect = chart.selectAll("rect")
+function redrawRect(propertyName, yOffset) {
+	var rect = chart.selectAll("rect." + propertyName)
 			.data(data, function(d) { return d.time; });
 
-  rect.enter().insert("rect", "line")
-      .attr("x", function(d, i) { return x(d.time); })
-      .attr("y", function(d) { return h - y(d.value) - 0.5; })
-      .attr("width", 2)
-      .attr("height", function(d) { return y(d.value); });
+	rect.enter().insert("rect", "line")
+			.attr("class", propertyName)
+			.attr("x", function(d, i) { return x(d.time); })
+			.attr("y", function(d) { return h - y(d[propertyName]) - 0.5 + yOffset; })
+			.attr("width", 2)
+			.attr("height", function(d) { return y(d[propertyName]); });
 
 	rect
-      .attr("x", function(d, i) { return x(d.time); });
+			.attr("x", function(d, i) { return x(d.time); });
 	
 	rect.exit()
 			.remove();
 }
+
