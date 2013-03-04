@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.util.SparseIntArray;
 import android.view.Menu;
+import android.view.View;
 import android.view.WindowManager;
 
 public class MainActivity extends Activity implements IOCallback, SensorEventListener {
@@ -38,6 +39,7 @@ public class MainActivity extends Activity implements IOCallback, SensorEventLis
 	private SparseIntArray soundPoolMap;
 	
 	SocketIO socket;
+	private boolean emitEvents;
 	
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -67,6 +69,8 @@ public class MainActivity extends Activity implements IOCallback, SensorEventLis
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+		
+		emitEvents = false;
 	}
 
 	@Override
@@ -115,7 +119,9 @@ public class MainActivity extends Activity implements IOCallback, SensorEventLis
 
 		if (prevReading != null && threshed && currReading.adx / Math.abs(currReading.adx) != prevReading.adx / Math.abs(prevReading.adx)) {
 			// Crossed over zero.
-			//socket.send("detection," + System.currentTimeMillis());
+			if (emitEvents) {
+				socket.emit("repDetected", System.currentTimeMillis());
+			}
 			
 			playSound(getApplicationContext(), R.raw.btn080);
 
@@ -125,15 +131,17 @@ public class MainActivity extends Activity implements IOCallback, SensorEventLis
 			threshed = true;
 		}
 		
-		socket.emit(
-				"sensorChanged",
-				System.currentTimeMillis(),
-				event.values[0],
-				event.values[1],
-				event.values[2],
-				currReading.adx,
-				currReading.ady,
-				currReading.adz);
+		if (emitEvents) {
+			socket.emit(
+					"sensorChanged",
+					System.currentTimeMillis(),
+					event.values[0],
+					event.values[1],
+					event.values[2],
+					currReading.adx,
+					currReading.ady,
+					currReading.adz);
+		}
 	}
 
     public void onMessage(JSONObject json, IOAcknowledge ack) {
@@ -166,6 +174,10 @@ public class MainActivity extends Activity implements IOCallback, SensorEventLis
     	if (event.equals("whoIs")) {
     		socket.emit("iAm", "reader");
     	}
+    }
+    
+    public void toggleEvents(View view) {
+    	emitEvents = !emitEvents;
     }
 	
 	private void playSound(final Context context, final int resourceId) {
