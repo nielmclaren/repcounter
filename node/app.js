@@ -24,9 +24,14 @@ io.sockets.on('connection', function (socket) {
 
 			case 'reader':
 				reader = socket;
-				socket.on('sensorChanged', function(time, x, y, z, adx, ady, adz) {
+				socket.on('sensorChanged', function(time, x, y, z) {
 					if (viewer) {
-						viewer.emit('sensorChanged', time, x, y, z, adx, ady, adz);
+						viewer.emit('sensorChanged', time, x, y, z);
+					}
+				});
+				socket.on('repDetected', function(time) {
+					if (viewer) {
+						viewer.emit('repDetected', time);
 					}
 				});
 				break;

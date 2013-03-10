@@ -12,14 +12,25 @@ textarea {
 	strokeWidth: 1px;
 }
 
-.chart line.x {
-  stroke: steelblue;
+.chart line.x, .chart line.dx, .chart line.ddx, .chart line.adx, .chart line.addx {
+  stroke: #00f;
 }
 
-.chart line.y {
-	stroke: red;
+.chart line.y, .chart line.dy, .chart line.ddy, .chart line.ady, .chart line.addy {
+	stroke: #f00;
 }
 
-.chart line.z {
-	stroke: green;
+.chart line.z, .chart line.dz, .chart line.ddz, .chart line.adz, .chart line.addz {
+	stroke: #0f0;
+}
+
+.chart line.rep {
+	strokeWidth: 2px;
+	stroke: #ccc;
+}
+
+.chart text {
+	font-family: Verdana, sans-serif;
+	font-size: 16pt;
+	font-weight: normal;
 }

@@ -5,12 +5,26 @@ public class AccelerometerReading {
 	public float x;
 	public float y;
 	public float z;
+	
+	// Differential.
 	public float dx;
 	public float dy;
 	public float dz;
+	
+	// Second differential.
+	public float ddx;
+	public float ddy;
+	public float ddz;
+	
+	// Average differential.
 	public float adx;
 	public float ady;
 	public float adz;
+	
+	// Average second differential.
+	public float addx;
+	public float addy;
+	public float addz;
 	
 	public AccelerometerReading(long timestamp, float xReading, float yReading, float zReading) {
 		t = timestamp;
@@ -22,9 +36,17 @@ public class AccelerometerReading {
 		dy = 0;
 		dz = 0;
 		
+		ddx = 0;
+		ddy = 0;
+		ddz = 0;
+		
 		adx = 0;
 		ady = 0;
 		adz = 0;
+		
+		addx = 0;
+		addy = 0;
+		addz = 0;
 	}
 	
 	public AccelerometerReading(long timestamp, float xReading, float yReading, float zReading, AccelerometerReading prevReading) {
@@ -37,9 +59,17 @@ public class AccelerometerReading {
 		dy = prevReading == null ? 0 : y - prevReading.y;
 		dz = prevReading == null ? 0 : z - prevReading.z;
 		
+		ddx = prevReading == null ? 0 : dx - prevReading.dx;
+		ddy = prevReading == null ? 0 : dy - prevReading.dy;
+		ddz = prevReading == null ? 0 : dz - prevReading.dz;
+		
 		adx = 0;
 		ady = 0;
 		adz = 0;
+		
+		addx = 0;
+		addy = 0;
+		addz = 0;
 	}
 	
 	public AccelerometerReading(long timestamp, float[] values) {
@@ -52,9 +82,17 @@ public class AccelerometerReading {
 		dy = 0;
 		dz = 0;
 		
+		ddx = 0;
+		ddy = 0;
+		ddz = 0;
+		
 		adx = 0;
 		ady = 0;
 		adz = 0;
+		
+		addx = 0;
+		addy = 0;
+		addz = 0;
 	}
 	
 	public AccelerometerReading(long timestamp, float[] values, AccelerometerReading prevReading) {
@@ -67,9 +105,17 @@ public class AccelerometerReading {
 		dy = prevReading == null ? 0 : y - prevReading.y;
 		dz = prevReading == null ? 0 : z - prevReading.z;
 		
+		ddx = prevReading == null ? 0 : dx - prevReading.dx;
+		ddy = prevReading == null ? 0 : dy - prevReading.dy;
+		ddz = prevReading == null ? 0 : dz - prevReading.dz;
+		
 		adx = 0;
 		ady = 0;
 		adz = 0;
+		
+		addx = 0;
+		addy = 0;
+		addz = 0;
 	}
 	
 	public String toString() {
