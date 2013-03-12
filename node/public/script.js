@@ -40,45 +40,40 @@ $(document).ready(function() {
 			zHighThreshed = false;
 		}
 		else {
+			// Reps are two-part cycles based on x- and z-axes. The half-rep
+			// (resting position) is detected when x is low and z is high. Then
+			// the rep is detected when x is high and z is low.
 			if (!xLowThreshed && x < 0) {
-				console.log('x low');
 				xLowThreshed = true;
 				xHighThreshed = false;
 
 				if (repped && zHighThreshed) {
-					console.log('half repped');
 					repped = false;
 				}
 			}
 			if (!xHighThreshed && x > 5) {
-				console.log('x high');
 				xLowThreshed = false;
 				xHighThreshed = true;
 
 				if (!repped && zLowThreshed) {
-					console.log('rep');
 					reps.push({time: time, count: repCount++});
 					repped = true;
 				}
 			}
 			if (!zLowThreshed && z < 0) {
-				console.log('z low');
 				zLowThreshed = true;
 				zHighThreshed = false;
 
 				if (!repped && xHighThreshed) {
-					console.log('rep');
 					reps.push({time: time, count: repCount++});
 					repped = true;
 				}
 			}
 			if (!zHighThreshed && z > 5) {
-				console.log('z high');
 				zLowThreshed = false;
 				zHighThreshed = true;
 
 				if (repped && xLowThreshed) {
-					console.log('half repped');
 					repped = false;
 				}
 			}
@@ -151,6 +146,8 @@ function step() {
 }
 
 function redrawProperty(propertyName, yOffset) {
+	yOffset += 40;
+
 	var line = chart.selectAll("line." + propertyName)
 			.data(readings, function(d) { return d.time; });
 
@@ -219,12 +216,12 @@ function redrawReps() {
 
 	label.enter().insert('text')
 			.attr('class', 'rep')
-			.attr("x", function(d) { return xScale(d.time); })
-			.attr("y", 24)
+			.attr("x", function(d) { return xScale(d.time) + 10; })
+			.attr("y", 40)
 			.text(function(d) { return d.count; });
 
 	label	
-			.attr("x", function(d, i) { return xScale(d.time); })
+			.attr("x", function(d, i) { return xScale(d.time) + 10; })
 	
 	label.exit()
 			.remove();

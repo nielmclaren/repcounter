@@ -25,12 +25,20 @@ textarea {
 }
 
 .chart line.rep {
-	strokeWidth: 2px;
-	stroke: #ccc;
+	strokeWidth: 4px;
+	stroke: #666;
 }
 
 .chart text {
+	fill: #aaa;
 	font-family: Verdana, sans-serif;
 	font-size: 16pt;
+	font-weight: normal;
+}
+
+.chart text.rep {
+	fill: #999;
+	font-family: Verdana, sans-serif;
+	font-size: 32pt;
 	font-weight: normal;
 }
